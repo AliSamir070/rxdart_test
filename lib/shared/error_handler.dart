@@ -21,18 +21,18 @@ class ErrorHandler implements Exception {
       return DataSource.NO_INTERNET_CONNECTION.getFailure();
     }
     switch (error.type) {
-      case DioErrorType.other:
+      case DioErrorType.unknown:
         {
           return DataSource.DEFAULT.getFailure();
         }
-      case DioErrorType.connectTimeout:
+      case DioErrorType.connectionTimeout:
         return DataSource.CONNECT_TIMEOUT.getFailure();
       case DioErrorType.sendTimeout:
         return DataSource.SEND_TIMEOUT.getFailure();
       case DioErrorType.receiveTimeout:
         return DataSource.RECIEVE_TIMEOUT.getFailure();
     // check if the response itself coming with null!!
-      case DioErrorType.response:
+      case DioErrorType.cancel:
         if (error.response != null &&
             error.response?.statusCode != null &&
             error.response?.statusMessage != null) {
@@ -43,8 +43,17 @@ class ErrorHandler implements Exception {
       case DioErrorType.cancel:
         return DataSource.CANCEL.getFailure();
 
-      case DioErrorType.other:
+      case DioErrorType.unknown:
         return DataSource.DEFAULT.getFailure();
+      case DioErrorType.badCertificate:
+        return DataSource.DEFAULT.getFailure();
+        break;
+      case DioErrorType.badResponse:
+        return DataSource.DEFAULT.getFailure();
+        break;
+      case DioErrorType.connectionError:
+        return DataSource.DEFAULT.getFailure();
+        break;
     }
   }
 }

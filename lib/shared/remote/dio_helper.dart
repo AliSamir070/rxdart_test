@@ -10,7 +10,7 @@ class DioHelper{
     dio = Dio(BaseOptions(
         baseUrl: Constants.baseUrl2,
         receiveDataWhenStatusError: true,
-        receiveTimeout: 30000,
+        receiveTimeout: Duration(milliseconds: 30000),
         followRedirects: false,
         validateStatus: (status) {
           return status! < 500;

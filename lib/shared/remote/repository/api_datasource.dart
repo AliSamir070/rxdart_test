@@ -9,7 +9,7 @@ import '../dio_helper.dart';
 
 class ApiDataSource extends MyRepository{
   @override
-  Future<Either<ProductList, String>> getSearchedProducts({String searchText = '',int collectionId = 0, bool isAlive = false, int min = 0, int max = 10000000, required int offset}) async{
+  Future<Either<ProductList, String>> getSearchedProducts({required String searchText,int collectionId = 0, bool isAlive = false, int min = 0, int max = 10000000, required int offset}) async{
     try {
       Response? response = await DioHelper.getSearchedProducts(
           searchText: searchText,
