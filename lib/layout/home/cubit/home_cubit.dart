@@ -1,5 +1,6 @@
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:rxdart/rxdart.dart';
 import 'package:rxdart_test/layout/home/cubit/home_state.dart';
 import 'package:rxdart_test/shared/error_handler.dart';
 import 'package:rxdart_test/shared/remote/repository/repository.dart';
@@ -12,17 +13,24 @@ import '../../../shared/constants.dart';
 import '../../../shared/internet_checker.dart';
 
 class HomeCubit extends Cubit<HomeStates>{
-  HomeCubit(this.repository):super(HomeInitialState());
+  HomeCubit(this.repository):super(HomeInitialState()){
+    resultStream = searchController
+        .debounceTime(Duration(milliseconds: 2000))
+        .switchMap((value) => null);
+  }
 
   static HomeCubit get(context)=>BlocProvider.of(context);
 
   MyRepository? repository;
   List<MeatShopProduct> products = [];
-  void searchProducts(String query)async{
+  BehaviorSubject<String> searchController = BehaviorSubject();
+  late Stream<List<MeatShopProduct>> resultStream;
+  
+  Future searchProducts(String query)async{
     await InternetChecker.checkConnectivity();
     if(InternetChecker.connectionStatus != ConnectivityResult.none){
       emit(HomeSearchLoadingState());
-      repository?.getSearchedProducts(
+      return repository?.getSearchedProducts(
           searchText: query,
           collectionId: _groupedFilter.category.collectionId,
           isAlive: isProductAlive,
