@@ -14,23 +14,40 @@ import '../../../shared/internet_checker.dart';
 
 class HomeCubit extends Cubit<HomeStates>{
   HomeCubit(this.repository):super(HomeInitialState()){
+    print("Start");
     resultStream = searchController
-        .debounceTime(Duration(milliseconds: 2000))
-        .switchMap((value) => null);
-  }
+        .debounce((_)=>TimerStream("start", Duration(milliseconds: 2000)))
+        .asyncMap((value)async{
+          return await searchProducts(value)??[];
+    });
+
+    searchController.sink.add("");
+
+  }/*HomeCubit(this.repository):super(HomeInitialState()){
+    print("Start");
+    searchController
+        .debounce((_)=>TimerStream("start", Duration(milliseconds: 2000)))
+        .listen((event) {
+          searchProducts(event).then((value) {
+            resultStream.sink.add(value??[]);
+          });
+    });
+    searchController.sink.add("");
+  }*/
 
   static HomeCubit get(context)=>BlocProvider.of(context);
 
   MyRepository? repository;
   List<MeatShopProduct> products = [];
   BehaviorSubject<String> searchController = BehaviorSubject();
+  //BehaviorSubject<List<MeatShopProduct>> resultStream = BehaviorSubject();
   late Stream<List<MeatShopProduct>> resultStream;
-  
-  Future searchProducts(String query)async{
+
+  Future<List<MeatShopProduct>?> searchProducts(String query)async{
     await InternetChecker.checkConnectivity();
     if(InternetChecker.connectionStatus != ConnectivityResult.none){
       emit(HomeSearchLoadingState());
-      return repository?.getSearchedProducts(
+      return await repository?.getSearchedProducts(
           searchText: query,
           collectionId: _groupedFilter.category.collectionId,
           isAlive: isProductAlive,
@@ -41,6 +58,7 @@ class HomeCubit extends Cubit<HomeStates>{
           value.fold((left) {
             products = left.results??[];
             emit(HomeSearchSuccessfulState());
+            return products;
           }, (right) {
             emit(HomeSearchErrorState(right));
           });
